@@ -223,8 +223,8 @@
       evento.preventDefault();
       limparMensagem();
 
-      if (!SCRIPT_URL || SCRIPT_URL === "https://script.google.com/macros/s/AKfycbzAp0NqEoNk7pQsmkEhrH-dj5pmbyNzisYJ09vOctkei9zbhZ-AcyOdcLLAKpwB5dbeQw/exec") {
-        mostrarMensagem("Configure primeiro a constante SCRIPT_URL com a URL do seu Google Apps Script.", "erro");
+      if (!SCRIPT_URL || !SCRIPT_URL.startsWith("https://")) {
+        mostrarMensagem("Configure primeiro a constante SCRIPT_URL com uma URL válida do Google Apps Script.", "erro");
         return;
       }
 
