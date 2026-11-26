@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Controle de Gastos Pessoais</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --border: #cbd5e1;
+      --success-bg: #dcfce7;
+      --success-text: #166534;
+      --error-bg: #fee2e2;
+      --error-text: #991b1b;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 460px;
+      background-color: var(--card);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+      border: 1px solid #e2e8f0;
+    }
+
+    .header {
+      margin-bottom: 22px;
+    }
+
+    .header h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background-color: #fff;
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    button {
+      width: 100%;
+      padding: 13px 16px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffffff;
+      background-color: var(--primary);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s, opacity 0.2s;
+      margin-top: 6px;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+    }
+
+    button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .mensagem {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      line-height: 1.4;
+      display: none;
+    }
+
+    .mensagem.sucesso {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #86efac;
+    }
+
+    .mensagem.erro {
+      display: block;
+      background-color: var(--error-bg);
+      color: var(--error-text);
+      border: 1px solid #fca5a5;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 22px 18px;
+      }
+
+      .header h1 {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="header">
+      <h1>Controle de Gastos</h1>
+      <p>Registre seus gastos diretamente na sua planilha do Google.</p>
+    </div>
+
+    <form id="form-gasto">
+      <div class="form-group">
+        <label for="descricao">Descrição</label>
+        <input
+          type="text"
+          id="descricao"
+          name="descricao"
+          placeholder="Ex.: Almoço, Uber, Mercado..."
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="categoria">Categoria</label>
+        <select id="categoria" name="categoria" required>
+          <option value="Alimentação">Alimentação</option>
+          <option value="Transporte">Transporte</option>
+          <option value="Lazer">Lazer</option>
+          <option value="Estudos">Estudos</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="valor">Valor (R$)</label>
+        <input
+          type="number"
+          id="valor"
+          name="valor"
+          step="0.01"
+          min="0.01"
+          placeholder="0.00"
+          required
+        />
+      </div>
+
+      <button type="submit" id="btn-salvar">Salvar Gasto</button>
+    </form>
+
+    <div id="mensagem" class="mensagem" role="alert" aria-live="polite"></div>
+  </main>
+
+  <script>
+    const SCRIPT_URL = "COLE_AQUI_A_URL_DO_APP_SCRIPT";
+
+    const form = document.getElementById("form-gasto");
+    const btnSalvar = document.getElementById("btn-salvar");
+    const mensagemEl = document.getElementById("mensagem");
+    const descricaoInput = document.getElementById("descricao");
+    const categoriaSelect = document.getElementById("categoria");
+    const valorInput = document.getElementById("valor");
+
+    function mostrarMensagem(texto, tipo) {
+      mensagemEl.textContent = texto;
+      mensagemEl.className = `mensagem ${tipo}`;
+    }
+
+    function limparMensagem() {
+      mensagemEl.textContent = "";
+      mensagemEl.className = "mensagem";
+    }
+
+    form.addEventListener("submit", async (evento) => {
+      evento.preventDefault();
+      limparMensagem();
+
+      if (!SCRIPT_URL || SCRIPT_URL === "COLE_AQUI_A_URL_DO_APP_SCRIPT") {
+        mostrarMensagem("Configure primeiro a constante SCRIPT_URL com a URL do seu Google Apps Script.", "erro");
+        return;
+      }
+
+      const descricao = descricaoInput.value.trim();
+      const categoria = categoriaSelect.value;
+      const valor = parseFloat(valorInput.value);
+
+      if (!descricao || Number.isNaN(valor)) {
+        mostrarMensagem("Preencha a descrição e um valor numérico válido.", "erro");
+        return;
+      }
+
+      btnSalvar.disabled = true;
+      btnSalvar.textContent = "Salvando...";
+
+      try {
+        const resposta = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify({
+            descricao: descricao,
+            categoria: categoria,
+            valor: valor
+          })
+        });
+
+        if (!resposta.ok) {
+          throw new Error(`Falha na requisição (HTTP ${resposta.status}).`);
+        }
+
+        const resultado = await resposta.json();
+
+        if (resultado.status === "sucesso") {
+          mostrarMensagem(resultado.mensagem || "Gasto salvo com sucesso!", "sucesso");
+          form.reset();
+          descricaoInput.focus();
+        } else {
+          throw new Error(resultado.mensagem || "Não foi possível salvar o gasto.");
+        }
+      } catch (erro) {
+        mostrarMensagem(`Erro ao salvar gasto: ${erro.message}`, "erro");
+      } finally {
+        btnSalvar.disabled = false;
+        btnSalvar.textContent = "Salvar Gasto";
+      }
+    });
+  </script>
+</body>
+</html>
