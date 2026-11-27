@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Controle de Gastos Pessoais</title>
+  <title>Painel Admin - Controle de Gastos</title>
   <style>
     :root {
       --bg: #f4f6f9;
@@ -12,6 +12,8 @@
       --muted: #64748b;
       --primary: #2563eb;
       --primary-hover: #1d4ed8;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
       --border: #cbd5e1;
       --success-bg: #dcfce7;
       --success-text: #166534;
@@ -20,258 +22,312 @@
       --radius: 12px;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg);
       color: var(--text);
-      min-height: 100vh;
+      padding: 24px 16px;
       display: flex;
-      align-items: center;
       justify-content: center;
-      padding: 16px;
     }
 
-    .container {
-      width: 100%;
-      max-width: 460px;
-      background-color: var(--card);
+    .container { width: 100%; max-width: 760px; }
+
+    .card {
+      background: var(--card);
       border-radius: var(--radius);
-      padding: 28px 24px;
+      padding: 24px;
       box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
       border: 1px solid #e2e8f0;
+      margin-bottom: 18px;
     }
 
-    .header {
-      margin-bottom: 22px;
-    }
+    .login-card { max-width: 420px; margin: 40px auto; }
 
-    .header h1 {
-      font-size: 1.45rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
+    h1 { font-size: 1.4rem; margin-bottom: 6px; }
+    p.sub { color: var(--muted); font-size: 0.92rem; margin-bottom: 18px; }
 
-    .header p {
-      font-size: 0.92rem;
-      color: var(--muted);
-    }
+    .form-group { margin-bottom: 14px; }
+    label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; }
 
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    label {
-      display: block;
-      font-size: 0.9rem;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--text);
-    }
-
-    input,
-    select {
+    input, select {
       width: 100%;
-      padding: 12px 14px;
-      font-size: 1rem;
+      padding: 11px 13px;
       border: 1px solid var(--border);
       border-radius: 8px;
-      background-color: #fff;
-      color: var(--text);
-      transition: border-color 0.2s, box-shadow 0.2s;
+      font-size: 0.96rem;
+      background: #fff;
     }
 
-    input:focus,
-    select:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-    }
-
-    button {
+    .btn-primary {
       width: 100%;
-      padding: 13px 16px;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #ffffff;
-      background-color: var(--primary);
+      padding: 12px;
+      background: var(--primary);
+      color: #fff;
       border: none;
       border-radius: 8px;
+      font-size: 0.98rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: background-color 0.2s, opacity 0.2s;
-      margin-top: 6px;
     }
 
-    button:hover:not(:disabled) {
-      background-color: var(--primary-hover);
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-primary:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
     }
 
-    button:disabled {
-      opacity: 0.65;
-      cursor: not-allowed;
-    }
-
-    .mensagem {
-      margin-top: 16px;
-      padding: 12px 14px;
+    .btn-sec {
+      padding: 8px 14px;
       border-radius: 8px;
-      font-size: 0.92rem;
-      line-height: 1.4;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stat {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .stat span { display: block; font-size: 0.82rem; color: var(--muted); }
+    .stat strong { font-size: 1.25rem; }
+
+    .table-wrap { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    th, td { padding: 11px 13px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+    th { background: #f8fafc; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; }
+    tr:last-child td { border-bottom: none; }
+
+    .badge {
+      background: #e0e7ff;
+      color: #3730a3;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .btn-del {
+      background: var(--danger);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-del:hover { background: var(--danger-hover); }
+
+    .msg {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
       display: none;
     }
 
-    .mensagem.sucesso {
-      display: block;
-      background-color: var(--success-bg);
-      color: var(--success-text);
-      border: 1px solid #86efac;
-    }
-
-    .mensagem.erro {
-      display: block;
-      background-color: var(--error-bg);
-      color: var(--error-text);
-      border: 1px solid #fca5a5;
-    }
-
-    @media (max-width: 480px) {
-      .container {
-        padding: 22px 18px;
-      }
-
-      .header h1 {
-        font-size: 1.3rem;
-      }
-    }
+    .msg.erro { display: block; background: var(--error-bg); color: var(--error-text); }
+    .msg.sucesso { display: block; background: var(--success-bg); color: var(--success-text); }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
-  <main class="container">
-    <div class="header">
-      <h1>Controle de Gastos</h1>
-      <p>Registre seus gastos diretamente na sua planilha do Google.</p>
+  <div class="container">
+    <!-- Login -->
+    <div id="login-box" class="card login-card">
+      <h1>Painel Administrativo</h1>
+      <p class="sub">Entre com sua senha para acessar os gastos da planilha.</p>
+      <form id="form-login">
+        <div class="form-group">
+          <label for="senha">Senha</label>
+          <input type="password" id="senha" required placeholder="••••••••" />
+        </div>
+        <button type="submit" id="btn-entrar" class="btn-primary">Entrar</button>
+      </form>
+      <div id="msg-login" class="msg"></div>
     </div>
 
-    <form id="form-gasto">
-      <div class="form-group">
-        <label for="descricao">Descrição</label>
-        <input
-          type="text"
-          id="descricao"
-          name="descricao"
-          placeholder="Ex.: Almoço, Uber, Mercado..."
-          required
-        />
+    <!-- Dashboard -->
+    <div id="painel-box" class="card hidden">
+      <div class="topbar">
+        <div>
+          <h1>Meus Gastos</h1>
+          <p class="sub" style="margin-bottom:0;">Dados carregados diretamente do Google Planilhas</p>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button type="button" id="btn-atualizar" class="btn-sec">Atualizar</button>
+          <button type="button" id="btn-sair" class="btn-sec">Sair</button>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="categoria">Categoria</label>
-        <select id="categoria" name="categoria" required>
-          <option value="Alimentação">Alimentação</option>
-          <option value="Transporte">Transporte</option>
-          <option value="Lazer">Lazer</option>
-          <option value="Estudos">Estudos</option>
-          <option value="Outros">Outros</option>
-        </select>
+      <div class="stats">
+        <div class="stat">
+          <span>Total Gasto</span>
+          <strong id="total-valor">R$ 0,00</strong>
+        </div>
+        <div class="stat">
+          <span>Lançamentos</span>
+          <strong id="total-qtd">0</strong>
+        </div>
+        <div class="stat">
+          <span>Maior Categoria</span>
+          <strong id="top-cat">-</strong>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="valor">Valor (R$)</label>
-        <input
-          type="number"
-          id="valor"
-          name="valor"
-          step="0.01"
-          min="0.01"
-          placeholder="0.00"
-          required
-        />
+      <div id="msg-painel" class="msg" style="margin-bottom:14px;"></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Data/Hora</th>
+              <th>Descrição</th>
+              <th>Categoria</th>
+              <th>Valor</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody id="corpo-tabela"></tbody>
+        </table>
       </div>
-
-      <button type="submit" id="btn-salvar">Salvar Gasto</button>
-    </form>
-
-    <div id="mensagem" class="mensagem" role="alert" aria-live="polite"></div>
-  </main>
+    </div>
+  </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygJAa_NObqiVP2t_Bc7sF6wqrZ_UfR6Z0X6j7c6ATmKArBKZmYD8UV78cLKJPdR6YxcA/exec";
+    let senhaAtual = "";
 
-    const form = document.getElementById("form-gasto");
-    const btnSalvar = document.getElementById("btn-salvar");
-    const mensagemEl = document.getElementById("mensagem");
-    const descricaoInput = document.getElementById("descricao");
-    const categoriaSelect = document.getElementById("categoria");
-    const valorInput = document.getElementById("valor");
+    const loginBox = document.getElementById("login-box");
+    const painelBox = document.getElementById("painel-box");
+    const formLogin = document.getElementById("form-login");
+    const btnEntrar = document.getElementById("btn-entrar");
+    const msgLogin = document.getElementById("msg-login");
+    const msgPainel = document.getElementById("msg-painel");
+    const corpoTabela = document.getElementById("corpo-tabela");
 
-    function mostrarMensagem(texto, tipo) {
-      mensagemEl.textContent = texto;
-      mensagemEl.className = `mensagem ${tipo}`;
+    function setMsg(el, texto, tipo) {
+      el.textContent = texto;
+      el.className = "msg " + tipo;
     }
 
-    function limparMensagem() {
-      mensagemEl.textContent = "";
-      mensagemEl.className = "mensagem";
+    function limparMsg(el) {
+      el.textContent = "";
+      el.className = "msg";
     }
 
-    form.addEventListener("submit", async (evento) => {
-      evento.preventDefault();
-      limparMensagem();
+    function moeda(v) {
+      return Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    }
 
-      if (!SCRIPT_URL || !SCRIPT_URL.startsWith("https://")) {
-        mostrarMensagem("Configure primeiro a constante SCRIPT_URL com uma URL válida do Google Apps Script.", "erro");
+    function escapar(str) {
+      const d = document.createElement("div");
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    formLogin.addEventListener("submit", (e) => {
+      e.preventDefault();
+      limparMsg(msgLogin);
+      const digitada = document.getElementById("senha").value;
+      btnEntrar.disabled = true;
+      btnEntrar.textContent = "Verificando...";
+
+      google.script.run
+        .withSuccessHandler((res) => {
+          senhaAtual = digitada;
+          loginBox.classList.add("hidden");
+          painelBox.classList.remove("hidden");
+          renderizar(res.gastos || []);
+          btnEntrar.disabled = false;
+          btnEntrar.textContent = "Entrar";
+        })
+        .withFailureHandler((err) => {
+          setMsg(msgLogin, err.message || "Acesso negado.", "erro");
+          btnEntrar.disabled = false;
+          btnEntrar.textContent = "Entrar";
+        })
+        .obterDadosAdmin(digitada);
+    });
+
+    function atualizarLista() {
+      if (!senhaAtual) return;
+      limparMsg(msgPainel);
+      google.script.run
+        .withSuccessHandler((res) => renderizar(res.gastos || []))
+        .withFailureHandler((err) => setMsg(msgPainel, err.message, "erro"))
+        .obterDadosAdmin(senhaAtual);
+    }
+
+    function renderizar(gastos) {
+      const total = gastos.reduce((acc, item) => acc + Number(item.valor || 0), 0);
+      document.getElementById("total-valor").textContent = moeda(total);
+      document.getElementById("total-qtd").textContent = gastos.length;
+
+      const porCat = {};
+      gastos.forEach((g) => {
+        porCat[g.categoria] = (porCat[g.categoria] || 0) + Number(g.valor || 0);
+      });
+      const maior = Object.entries(porCat).sort((a, b) => b[1] - a[1])[0];
+      document.getElementById("top-cat").textContent = maior ? maior[0] : "-";
+
+      if (!gastos.length) {
+        corpoTabela.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#64748b;">Nenhum gasto encontrado.</td></tr>`;
         return;
       }
 
-      const descricao = descricaoInput.value.trim();
-      const categoria = categoriaSelect.value;
-      const valor = parseFloat(valorInput.value);
+      corpoTabela.innerHTML = gastos.map((g) => `
+        <tr>
+          <td>${escapar(g.dataHora)}</td>
+          <td><strong>${escapar(g.descricao)}</strong></td>
+          <td><span class="badge">${escapar(g.categoria)}</span></td>
+          <td>${moeda(g.valor)}</td>
+          <td><button type="button" class="btn-del" onclick="excluir(${g.linhaPlanilha})">Excluir</button></td>
+        </tr>
+      `).join("");
+    }
 
-      if (!descricao || Number.isNaN(valor)) {
-        mostrarMensagem("Preencha a descrição e um valor numérico válido.", "erro");
-        return;
-      }
+    function excluir(linha) {
+      if (!confirm("Deseja realmente excluir este registro?")) return;
+      limparMsg(msgPainel);
 
-      btnSalvar.disabled = true;
-      btnSalvar.textContent = "Salvando...";
+      google.script.run
+        .withSuccessHandler((res) => {
+          setMsg(msgPainel, res.mensagem || "Excluído!", "sucesso");
+          atualizarLista();
+        })
+        .withFailureHandler((err) => setMsg(msgPainel, err.message, "erro"))
+        .excluirGastoAdmin(senhaAtual, linha);
+    }
 
-      try {
-        const resposta = await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "text/plain;charset=utf-8"
-          },
-          body: JSON.stringify({
-            descricao: descricao,
-            categoria: categoria,
-            valor: valor
-          })
-        });
+    document.getElementById("btn-atualizar").addEventListener("click", atualizarLista);
 
-        if (!resposta.ok) {
-          throw new Error(`Falha na requisição (HTTP ${resposta.status}).`);
-        }
-
-        const resultado = await resposta.json();
-
-        if (resultado.status === "sucesso") {
-          mostrarMensagem(resultado.mensagem || "Gasto salvo com sucesso!", "sucesso");
-          form.reset();
-          descricaoInput.focus();
-        } else {
-          throw new Error(resultado.mensagem || "Não foi possível salvar o gasto.");
-        }
-      } catch (erro) {
-        mostrarMensagem(`Erro ao salvar gasto: ${erro.message}`, "erro");
-      } finally {
-        btnSalvar.disabled = false;
-        btnSalvar.textContent = "Salvar Gasto";
-      }
+    document.getElementById("btn-sair").addEventListener("click", () => {
+      senhaAtual = "";
+      document.getElementById("senha").value = "";
+      painelBox.classList.add("hidden");
+      loginBox.classList.remove("hidden");
+      limparMsg(msgLogin);
     });
   </script>
 </body>
